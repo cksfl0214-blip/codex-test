@@ -1,5 +1,8 @@
+from pathlib import Path
+
+
 def print_report(metrics: dict) -> None:
-    """계산된 지표를 사용자에게 보기 쉬운 형태로 출력합니다."""
+    """계산된 지표를 사용자에게 보기 쉬운 형태로 출력하고 markdown 보고서를 저장합니다."""
     print("춘천시립도서관 GA4 트래픽 요약")
     print("--------------------------------")
     print(f"분석 기간: {metrics['period_start']} ~ {metrics['period_end']}")
@@ -13,3 +16,38 @@ def print_report(metrics: dict) -> None:
     print()
     print(f"가장 사용자가 많은 날: {metrics['max_date']} / {metrics['max_users']:,}명")
     print(f"가장 사용자가 적은 날: {metrics['min_date']} / {metrics['min_users']:,}명")
+
+    write_report_markdown(metrics)
+
+
+def write_report_markdown(metrics: dict) -> None:
+    """분석 결과를 reports/report.md 파일로 저장합니다."""
+    reports_dir = Path("reports")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    report_path = reports_dir / "report.md"
+
+    report_content = f"""# 춘천시립도서관 GA4 트래픽 요약
+
+## 분석 기간
+- {metrics['period_start']} ~ {metrics['period_end']}
+
+## 주요 지표
+- 일 평균 총 사용자 수: {metrics['average_users']:.0f}명
+- 총 사용자 수 합계: {metrics['total_users']:,}명
+- 새 사용자 수 합계: {metrics['total_new_users']:,}명
+- 세션 수 합계: {metrics['total_sessions']:,}회
+- 조회수 합계: {metrics['total_views']:,}회
+- 평균 세션당 조회수: {metrics['average_views_per_session']:.2f}회
+- 평균 세션 시간: {metrics['average_session_time']:.1f}초
+
+## 가장 사용자가 많은 날
+- 날짜: {metrics['max_date']}
+- 사용자 수: {metrics['max_users']:,}명
+
+## 가장 사용자가 적은 날
+- 날짜: {metrics['min_date']}
+- 사용자 수: {metrics['min_users']:,}명
+"""
+
+    report_path.write_text(report_content, encoding="utf-8")
